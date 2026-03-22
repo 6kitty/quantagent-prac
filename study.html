@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuantAgent · 학습 가이드</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+<style>
+:root {
+  --bg: #070b12;
+  --bg2: #0d1320;
+  --bg3: #111827;
+  --border: #1e2d42;
+  --border2: #243447;
+  --accent: #00d4aa;
+  --accent2: #f0b429;
+  --accent3: #4f9cf9;
+  --accent-red: #f87171;
+  --text: #c8d6e8;
+  --text-dim: #5a7a9a;
+  --text-bright: #eaf2ff;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Noto Sans KR', sans-serif;
+  --display: 'Syne', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:14px;
+  line-height:1.7;
+  min-height:100vh;
+}
+
+/* HEADER */
+.header{
+  background:linear-gradient(135deg,#060b14 0%,#0a1628 100%);
+  border-bottom:1px solid var(--border);
+  padding:20px 32px 16px;
+  position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(12px);
+}
+.header-row{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+.logo{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--accent);letter-spacing:.08em}
+.logo span{color:var(--text-dim);font-weight:400}
+.badge{background:#00d4aa18;border:1px solid #00d4aa44;color:var(--accent);font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:2px;letter-spacing:.1em}
+
+/* TABS */
+.tabs{display:flex;gap:2px;overflow-x:auto;padding-bottom:4px}
+.tabs::-webkit-scrollbar{height:2px}
+.tabs::-webkit-scrollbar-track{background:transparent}
+.tabs::-webkit-scrollbar-thumb{background:var(--border2)}
+.tab{
+  background:transparent;border:none;
+  color:var(--text-dim);font-family:var(--mono);font-size:11px;
+  padding:6px 14px;cursor:pointer;white-space:nowrap;
+  border-bottom:2px solid transparent;
+  transition:all .15s ease;letter-spacing:.04em;
+}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* CONTENT */
+.content{max-width:1100px;margin:0 auto;padding:32px 24px}
+.panel{display:none}
+.panel.active{display:block}
+
+/* SECTION HEADER */
+.section-header{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:24px;padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+}
+.section-num{
+  font-family:var(--mono);font-size:10px;color:var(--accent);
+  background:#00d4aa12;border:1px solid #00d4aa30;
+  padding:2px 8px;border-radius:2px;letter-spacing:.08em;
+}
+.section-title{font-family:var(--display);font-size:22px;color:var(--text-bright);font-weight:700}
+
+/* DOMAIN GRID */
+.domain-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+
+/* DOMAIN CARD */
+.domain-card{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:6px;
+  overflow:hidden;
+  transition:border-color .2s;
+}
+.domain-card:hover{border-color:var(--border2)}
+.domain-card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;cursor:pointer;
+  user-select:none;
+}
+.domain-card-header:hover .card-title{color:var(--text-bright)}
+.card-cat{
+  font-family:var(--mono);font-size:9px;letter-spacing:.1em;
+  padding:2px 6px;border-radius:2px;
+}
+.cat-price{background:#4f9cf920;color:var(--accent3)}
+.cat-tech{background:#00d4aa20;color:var(--accent)}
+.cat-equity{background:#f0b42920;color:var(--accent2)}
+.cat-fund{background:#a78bfa20;color:#a78bfa}
+.cat-bond{background:#fb923c20;color:#fb923c}
+.cat-fx{background:#34d39920;color:#34d399}
+.cat-comm{background:#f4725120;color:#f47251}
+.cat-deriv{background:#e879f920;color:#e879f9}
+.cat-risk{background:#f8717120;color:var(--accent-red)}
+.cat-macro{background:#60a5fa20;color:#60a5fa}
+.cat-news{background:#fbbf2420;color:#fbbf24}
+.cat-screen{background:#00d4aa20;color:var(--accent)}
+.cat-event{background:#f0b42920;color:var(--accent2)}
+.card-title{font-weight:700;font-size:13px;color:var(--text);transition:color .15s}
+.card-arrow{color:var(--text-dim);font-size:10px;transition:transform .2s}
+.domain-card.open .card-arrow{transform:rotate(90deg)}
+.domain-card-body{
+  padding:0 16px;max-height:0;overflow:hidden;
+  transition:max-height .3s ease, padding .3s ease;
+}
+.domain-card.open .domain-card-body{max-height:900px;padding:0 16px 16px}
+
+/* KV LIST */
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin-bottom:12px}
+.kv dt{font-family:var(--mono);font-size:11px;color:var(--accent2);font-weight:700;white-space:nowrap;padding-top:2px}
+.kv dd{font-size:13px;color:var(--text)}
+.note{
+  background:#00d4aa08;border-left:2px solid var(--accent);
+  padding:8px 12px;border-radius:0 4px 4px 0;
+  font-size:12px;color:var(--text-dim);margin-top:8px;
+}
+.note strong{color:var(--accent2)}
+.formula{
+  font-family:var(--mono);font-size:12px;
+  background:#0a1628;border:1px solid var(--border);
+  padding:8px 12px;border-radius:4px;margin:8px 0;
+  color:#a5f3fc;letter-spacing:.02em;
+}
+
+/* CODE SECTION */
+.code-section{margin-bottom:32px}
+.code-section-title{
+  font-family:var(--mono);font-size:11px;color:var(--accent2);
+  letter-spacing:.08em;margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;
+}
+.code-section-title::before{content:'▸';color:var(--accent)}
+.code-desc{color:var(--text-dim);font-size:13px;margin-bottom:10px;line-height:1.6}
+.code-wrap{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:6px;overflow:hidden;
+}
+.code-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--border);
+}
+.code-lang{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.06em}
+.copy-btn{
+  font-family:var(--mono);font-size:10px;color:var(--text-dim);
+  background:transparent;border:1px solid var(--border2);
+  padding:2px 10px;border-radius:2px;cursor:pointer;
+  transition:all .15s;
+}
+.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+.code-wrap pre{margin:0!important;border-radius:0!important}
+.code-wrap code.hljs{padding:16px!important;font-size:12px!important;font-family:var(--mono)!important;line-height:1.6!important}
+
+/* STEPS */
+.steps{display:flex;flex-direction:column;gap:16px;margin-bottom:24px}
+.step{
+  display:flex;gap:16px;
+  background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:16px;
+}
+.step-num{
+  flex-shrink:0;width:28px;height:28px;
+  background:#00d4aa18;border:1px solid #00d4aa40;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:700;
+}
+.step-content{}
+.step-title{font-weight:700;color:var(--text-bright);margin-bottom:4px}
+.step-body{font-size:13px;color:var(--text-dim);line-height:1.6}
+.step-body a{color:var(--accent3);text-decoration:none}
+.step-body a:hover{text-decoration:underline}
+
+/* CALLOUT */
+.callout{
+  background:#f0b42910;border:1px solid #f0b42930;
+  border-radius:6px;padding:12px 16px;
+  font-size:13px;color:var(--text);margin:12px 0;
+}
+.callout.info{background:#4f9cf910;border-color:#4f9cf930}
+.callout.warn{background:#f8717110;border-color:#f8717130}
+.callout b{color:var(--accent2)}
+.callout.info b{color:var(--accent3)}
+.callout.warn b{color:var(--accent-red)}
+
+/* STRATEGY CARD (변동성 돌파) */
+.strategy-card{
+  background:linear-gradient(135deg,#0d1a2a,#0a1628);
+  border:1px solid var(--accent);border-radius:8px;padding:20px;
+  margin-bottom:24px;
+}
+.strategy-card h3{
+  font-family:var(--display);font-size:16px;color:var(--accent);
+  margin-bottom:4px;
+}
+.strategy-card .sub{font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-bottom:12px}
+
+/* TABLE */
+.styled-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}
+.styled-table th{
+  background:var(--bg3);color:var(--accent2);
+  font-family:var(--mono);font-weight:700;
+  padding:8px 12px;text-align:left;
+  border-bottom:1px solid var(--border2);letter-spacing:.04em;
+}
+.styled-table td{
+  padding:8px 12px;border-bottom:1px solid var(--border);
+  color:var(--text);
+}
+.styled-table tr:last-child td{border-bottom:none}
+.styled-table tr:hover td{background:#ffffff04}
+
+/* PILLS */
+.pill{
+  display:inline-block;font-family:var(--mono);font-size:10px;
+  padding:1px 7px;border-radius:2px;margin:2px;
+}
+.pill-green{background:#00d4aa18;color:var(--accent);border:1px solid #00d4aa30}
+.pill-yellow{background:#f0b42918;color:var(--accent2);border:1px solid #f0b42930}
+.pill-blue{background:#4f9cf918;color:var(--accent3);border:1px solid #4f9cf930}
+.pill-red{background:#f8717118;color:var(--accent-red);border:1px solid #f8717130}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--border);margin:24px 0}
+
+@media(max-width:640px){
+  .domain-grid{grid-template-columns:1fr}
+  .content{padding:20px 14px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-row">
+    <div class="logo">QA<span>/</span>STUDY</div>
+    <div class="badge">QuantAgent · 학습 가이드 v1.0</div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('domain',this)">① 도메인 지식</button>
+    <button class="tab" onclick="switchTab('eng_a',this)">② 서비스 가입 (a)</button>
+    <button class="tab" onclick="switchTab('eng_b',this)">③ LLM 엔지니어링 (b)</button>
+    <button class="tab" onclick="switchTab('eng_c',this)">④ 데이터 API (c)</button>
+    <button class="tab" onclick="switchTab('eng_d',this)">⑤ Rate Limit 극복 (d)</button>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ═══════════════════════════════════════════════════
+     PANEL 1 · 도메인 지식
+═══════════════════════════════════════════════════ -->
+<div id="panel-domain" class="panel active">
+  <div class="section-header">
+    <span class="section-num">DOMAIN</span>
+    <span class="section-title">도메인 지식 내재화</span>
+  </div>
+  <div class="callout info" style="margin-bottom:20px">
+    <b>학습 방법:</b> 각 카드를 열어 핵심 개념을 이해하고, 관련 뉴스 기사(한국경제, 매일경제)에서 해당 용어를 직접 찾아보세요. 단순 암기가 아닌 "이 개념이 왜 필요한가?"를 생각하며 내재화하는 것이 목표입니다.
+  </div>
+
+  <!-- 변동성 돌파 전략 하이라이트 -->
+  <div class="strategy-card">
+    <h3>★ 변동성 돌파 전략 (Volatility Breakout)</h3>
+    <div class="sub">Larry Williams · 국내 퀀트 커뮤니티에서 가장 많이 회자되는 전략</div>
+    <dl class="kv">
+      <dt>핵심 아이디어</dt><dd>전일 변동폭(고가-저가)의 일정 비율(k)만큼 시가를 초과하면 돌파로 판단하고 매수</dd>
+      <dt>매수 시점</dt><dd>당일 가격 ≥ 당일 시가 + (전일 고가 – 전일 저가) × k</dd>
+      <dt>매도 시점</dt><dd>당일 장 마감 (종가 청산) — 오버나이트 리스크 제거</dd>
+      <dt>k 값</dt><dd>0.4~0.6 범위가 일반적; 작을수록 신호 많고 노이즈 증가</dd>
+    </dl>
+    <div class="formula">target_price = open + (prev_high - prev_low) × k</div>
+    <div class="note"><strong>왜 작동하는가?</strong> 변동폭이 크다는 것은 관심과 에너지가 집중됐다는 의미. 그 에너지가 특정 방향으로 터지면(돌파) 모멘텀이 이어질 가능성이 높음. 단, 횡보장·박스권에서는 성과가 약함 → ATR 조건 추가로 필터링 권장</div>
+  </div>
+
+  <div class="domain-grid">
+
+    <!-- 1. 가격 데이터 구조 -->
+    <div class="domain-card" id="card-1">
+      <div class="domain-card-header" onclick="toggleCard('card-1')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="card-cat cat-price">DATA</span>
+          <span class="card-title">가격 데이터 구조</span>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="domain-card-body">
+        <dl class="kv">
+          <dt>OHLCV</dt><dd><b style="color:#eaf2ff">O</b>pen 시가 / <b style="color:#eaf2ff">H</b>igh 고가 / <b style="color:#eaf2ff">L</b>ow 저가 / <b style="color:#eaf2ff">C</b>lose 종가 / <b style="color:#eaf2ff">V</b>olume 거래량. 캔들 차트의 기본 단위</dd>
+          <dt>Bid / Ask</dt><dd>매수호가(Bid) = 사려는 가격 / 매도호가(Ask) = 팔려는 가격. 스프레드(Ask-Bid)가 클수록 유동성 낮음</dd>
+          <dt>수정주가</dt><dd>배당, 액면분할, 무상증자 등 이벤트 발생 시 과거 주가를 소급 조정한 가격. 백테스팅에는 반드시 수정주가 사용</dd>
+          <dt>Tick 데이터</dt><dd>모든 개별 체결 기록(시간·가격·수량). OHLCV보다 세밀하지만 데이터량이 압도적으로 큼. HFT에서 주로 활용</dd>
+        </dl>
+        <div class="note"><strong>실무 팁:</strong> KIS API 일봉은 수정주가 옵션 제공. 백테스팅 시 adj_close 컬럼 사용 필수. 미수정 종가로 백테스트하면 수익률 왜곡 발생</div>
+      </div>
+    </div>
+
+    <!-- 2. 기술적 분석 -->
+    <div class="domain-card" id="card-2">
+      <div class="domain-card-header" onclick="toggleCard('card-2')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="card-cat cat-tech">TECH</span>
+          <span class="card-title">기술적 분석</span>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="domain-card-body">
+        <dl class="kv">
+          <dt>SMA</dt><dd>단순이동평균. N일간 종가 합계 ÷ N. 과거 가격에 동일 가중치</dd>
+          <dt>EMA</dt><dd>지수이동평균. 최근 데이터에 더 높은 가중치. α = 2/(N+1). SMA보다 빠르게 반응</dd>
+          <dt>볼린저밴드</dt><dd>중심선(20일 SMA) ± 2σ. 가격의 95% 구간. 밴드 수축 = 변동성 감소 → 큰 움직임 예고</dd>
+          <dt>RSI</dt><dd>상대강도지수(0~100). 14일 기준. 70 이상 과매수, 30 이하 과매도. 추세 강도 측정</dd>
+          <dt>MACD</dt><dd>12일EMA − 26일EMA = MACD선. MACD의 9일EMA = Signal선. 골든크로스(MACD>Signal) 매수 신호</dd>
+          <dt>ATR</dt><dd>Average True Range. 일별 실제 변동폭 평균. 변동성 돌파 k 값 조합에 자주 쓰임</dd>
+        </dl>
+        <div class="formula">RSI = 100 − (100 ÷ (1 + 평균상승폭/평균하락폭))</div>
+        <div class="note"><strong>TA-Lib에서:</strong> talib.RSI(close, timeperiod=14) / talib.MACD(close) / talib.BBANDS(close). 150개 지표 모두 동일한 인터페이스로 호출</div>
+      </div>
+    </div>
+
+    <!-- 3. 주식 기초 -->
+    <div class="domain-card" id="card-3">
+      <div class="domain-card-header" onclick="toggleCard('card-3')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="card-cat cat-equity">EQUITY</span>
+          <span class="card-title">주식 기초 (Equities)</span>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="domain-card-body">
+        <dl class="kv">
+          <dt>시가총액</dt><dd>현재 주가 × 총 발행주식수. 삼성전자 ~400조. 시총 규모로 대형주/중형주/소형주 구분</dd>
+          <dt>PER</dt><dd>주가수익비율 = 주가 ÷ EPS. 낮을수록 저평가 가능성. 업종 평균과 비교해야 의미 있음. 성장주는 PER 높아도 정당화 가능</dd>
+          <dt>PBR</dt><dd>주가순자산비율 = 주가 ÷ BPS. 1 미만이면 청산가치 이하. 금융주 밸류에이션에 주로 사용</dd>
+          <dt>EV/EBITDA</dt><dd>기업가치(시총+순차입금) ÷ EBITDA. 자본구조 무관한 기업가치 비교에 유용. M&A 시 자주 쓰임</dd>
+          <dt>EPS</dt><dd>주당순이익 = 당기순이익 ÷ 발행주식수. 어닝 서프라이즈/쇼크가 주가에 큰 영향</dd>
+          <dt>배당수익률</dt><dd>DPS(주당배당금) ÷ 주가 × 100. 한국 평균 약 2%. 고배당주 스크리닝에 활용</dd>
+        </dl>
+        <div class="note"><strong>팩터 투자 연결:</strong> 낮은 PER·PBR = 밸류 팩터 / 높은 ROE·EPS 성장 = 퀄리티 팩터 / 52주 수익률 상위 = 모멘텀 팩터</div>
+      </div>
+    </div>
+
+    <!-- 4. 기업 펀더멘털 -->
+    <div class="domain-card" id="card-4">
+      <div class="domain-card-header" onclick="toggleCard('card-4')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="card-cat cat-fund">FUND</span>
+          <span class="card-title">기업 펀더멘털</span>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="domain-card-body">
+        <dl class="kv">
+          <dt>손익계산서</dt><dd>매출액 → 매출원가 → 매출총이익 → 영업이익(EBIT) → 순이익. 분기/연간 발표. 영업이익률이 핵심 지표</dd>
+          <dt>대차대조표</dt><dd>자산 = 부채 + 자본. 유동자산/비유동자산, 단기부채/장기부채 구분. 재무 건전성 파악</dd>
+          <dt>현금흐름표</dt><dd>영업CF(실제 현금 창출력), 투자CF(CAPEX 등), 재무CF(차입/배당). 순이익보다 FCF(잉여현금흐름)가 더 중요한 지표</dd>
+          <dt>ROE</dt><dd>자기자본이익률 = 순이익 ÷ 자기자본. 15% 이상이면 우량. 버핏이 선호하는 지표</dd>
+          <dt>부채비율</dt><dd>총부채 ÷ 자기자본. 200% 이하를 건전하다고 봄. 업종별로 기준 다름(금융업 제외)</dd>
+        </dl>
+        <div class="note"><strong>DART 연결:</strong> 금융감독원 DART API로 상장사 재무제표 무료 수집 가능. FSS_API_KEY 필요</div>
+      </div>
+    </div>
+
+    <!-- 5. 채권/금리 -->
+    <div class="domain-card" id="card-5">
+      <div class="domain-card-header" onclick="toggleCard('card-5')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="card-cat cat-bond">BOND</span>
+          <span class="card-title">채권 / 금리</span>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="domain-card-body">
+        <dl class="kv">
+          <dt>YTM</dt><dd>만기수익률(Yield To Maturity). 채권을 만기까지 보유 시 연평균 수익률. 채권 가격과 역방향 관계</dd>
+          <dt>Yield Curve</dt><dd>만기별 금리 구조. 정상: 장기>단기(우상향). 역전(Inverted): 단기>장기 → 경기침체 선행지표. 2022~2023 미국 역전 사례</dd>
+          <dt>Duration</dt><dd>금리 변동에 대한 채권 가격 민감도. Duration 5 = 금리 1%p 상승 시 가격 약 5% 하락. 장기채일수록 큼</dd>
+          <dt>신용스프레드</dt><dd>회사채 YTM – 국채 YTM. 스프레드 확대 = 신용 리스크 증가 = 주식 시장에도 부정적 신호</dd>
+        </dl>
+        <div class="note"><strong>BOK API 연결:</strong> 한국은행 ECOS API(BOK_API_KEY)로 기준금리, 국채금리, 통안채금리 등 실시간 수집 가능</div>
+      </div>
+    </div>
+
+    <!-- 6. 외환(FX) -->
+    <div class="domain-card" id="card-6">
+      <div class="domain-card-header" onclick="toggleCard('card-6')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="card-cat cat-fx">FX</span>
+          <span class="card-title">외환 (FX)</span>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="domain-card-body">
+        <dl class="kv">
+          <dt>직접 호가</dt><dd>자국 통화 기준. USD/KRW = 1달러당 원화. 한국에서는 직접 호가 방식(1 USD = 1,350 KRW)</dd>
+          <dt>간접 호가</dt><dd>외국 통화 기준. EUR/USD = 1유로당 달러. 유로존 통화에서 주로 사용</dd>
+          <dt>스팟 환율</dt><dd>현재 즉시 결제 기준 환율. 거래 후 T+2 결제가 관행</dd>
+          <dt>포워드 환율</dt><dd>미래 특정 시점의 환율을 지금 확정. 환 헤지 목적. F = S × (1+r_d)/(1+r_f) (이자율 평가)</dd>
+          <dt>환율 변동성</dt><dd>원/달러 일간 변동폭 ±0.5~1% 수준. 급격한 변동은 수출주 실적에 영향 → 이벤트 드리븐 요소</dd>
+        </dl>
+        <div class="note"><strong>퀀트 연결:</strong> 글로벌 투자 전략에서 환 헤지 여부는 성과에 큰 영향. 원화 약세 → 수출주 수혜 팩터로 모델링 가능</div>
+      </div>
+    </div>
+
+    <!-- 7. 원자재 -->
+    <div class="domain-card" id="card-7">
+      <div class="domain-card-header" onclick="toggleCard('card-7')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="card-cat cat-comm">COMM</span>
+          <span class="card-title">원자재 (Commodities)</span>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="domain-card-body">
+        <dl class="kv">
+          <dt>현물가</dt><dd>지금 즉시 인도 기준 가격. WTI 원유 현물, 런던 금 현물 등</dd>
+          <dt>선물가</dt><dd>미래 특정 시점에 인도하기로 계약한 가격. 만기일 접근 시 현물가와 수렴</dd>
+          <dt>콘탱고</dt><dd>선물가 > 현물가. 정상 상태(보관비용, 이자 반영). ETF 롤오버 시 손실 발생 (롤 비용)</dd>
+          <dt>백워데이션</dt><dd>선물가 < 현물가. 공급 부족/급수요 상황. ETF 롤오버 시 이익</dd>
+          <dt>원자재 지수</dt><dd>CRB 지수, S&P GSCI, Bloomberg Commodity Index. 원자재 시장 전체 방향성 파악</dd>
+        </dl>
+        <div class="note"><strong>시장 연결:</strong> 유가↑ → 정유·에너지주 수혜, 항공·운송주 부담 / 구리↑ → 경기 확장 신호 / 금↑ → 안전자산 선호 신호</div>
+      </div>
+    </div>
+
+    <!-- 8. 파생상품 -->
+    <div class="domain-card" id="card-8">
+      <div class="domain-card-header" onclick="toggleCard('card-8')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="card-cat cat-deriv">DERIV</span>
+          <span class="card-title">파생상품</span>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="domain-card-body">
+        <dl class="kv">
+          <dt>콜 옵션</dt><dd>특정 가격(행사가)에 기초자산을 살 수 있는 권리. 주가 상승 시 이익. 프리미엄(권리금) 지불</dd>
+          <dt>풋 옵션</dt><dd>특정 가격에 기초자산을 팔 수 있는 권리. 주가 하락 헤지 목적. 보험 개념</dd>
+          <dt>Black-Scholes</dt><dd>옵션 이론 가격 결정 모델. 입력변수: 기초자산가격(S), 행사가(K), 만기(T), 무위험금리(r), 변동성(σ)</dd>
+          <dt>Delta (δ)</dt><dd>기초자산 가격 1원 변화 시 옵션 가격 변화량. 콜: 0~1 / 풋: -1~0. 헤지 비율로 사용</dd>
+          <dt>Vega (ν)</dt><dd>내재 변동성(IV) 1%p 변화 시 옵션 가격 변화. IV 상승 시 콜·풋 모두 가격 상승</dd>
+          <dt>Theta (θ)</dt><dd>시간 감쇠. 만기까지 1일 경과 시 옵션 가치 감소량. 옵션 매도자에게 유리</dd>
+        </dl>
+        <div class="formula">C = S·N(d₁) − K·e^(−rT)·N(d₂)</div>
+        <div class="note"><strong>VIX 연결:</strong> 변동성지수 VIX는 S&P 500 옵션의 내재변동성. VIX 20+ = 공포 구간. 코스피 200 VIX(VKOSPI)도 동일 원리</div>
+      </div>
+    </div>
+
+    <!-- 9. 포트폴리오 리스크 -->
+    <div class="domain-card" id="card-9">
+      <div class="domain-card-header" onclick="toggleCard('card-9')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="card-cat cat-risk">RISK</span>
+          <span class="card-title">포트폴리오 리스크</span>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="domain-card-body">
+        <dl class="kv">
+          <dt>VaR</dt><dd>Value at Risk. "X% 신뢰수준에서 N일간 최대 예상 손실 ≤ Y원". 95% VaR 1일 1억 = 5% 확률로 1억 이상 손실 가능</dd>
+          <dt>MDD</dt><dd>Maximum Drawdown = 최대 낙폭. 전고점 대비 최저점까지 하락폭. MDD -30% 전략이면 버틸 수 있는지 판단 필수</dd>
+          <dt>Sharpe Ratio</dt><dd>(전략 수익률 − 무위험 수익률) ÷ 표준편차. 1 이상이면 우수. 위험 대비 초과 수익 측정</dd>
+          <dt>상관관계</dt><dd>-1~1 사이 값. 상관관계 낮은 자산 조합 = 분산투자 효과. 포트폴리오 구성의 핵심</dd>
+          <dt>스트레스 테스트</dt><dd>2008 금융위기, 2020 코로나 폭락 구간에서 전략이 어떻게 버텼는지 시뮬레이션. 백테스팅 필수 항목</dd>
+        </dl>
+        <div class="formula">Sharpe = (Rp − Rf) / σp</div>
+      </div>
+    </div>
+
+    <!-- 10. 거시경제 -->
+    <div class="domain-card" id="card-10">
+      <div class="domain-card-header" onclick="toggleCard('card-10')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="card-cat cat-macro">MACRO</span>
+          <span class="card-title">거시경제 지표</span>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="domain-card-body">
+        <dl class="kv">
+          <dt>GDP</dt><dd>국내총생산. QoQ/YoY 성장률이 시장 기대치 대비 어떤지가 중요. 예상치 상회 → 주식시장 강세 요인</dd>
+          <dt>CPI</dt><dd>소비자물가지수. 인플레이션 핵심 지표. CPI↑ → 금리 인상 압력 → 성장주 밸류에이션 하락 압력</dd>
+          <dt>기준금리</dt><dd>한국은행 금통위 결정(연 8회). 금리↑ = 주식 할인율 상승 = PER 하락 압력. 채권가격과 역방향</dd>
+          <dt>실업률</dt><dd>낮을수록 경기 호조 신호지만, 너무 낮으면 임금 상승 → 인플레 → 금리 인상 압력</dd>
+          <dt>PMI</dt><dd>구매관리자지수. 50 초과 = 경기 확장, 이하 = 수축. 월별 발표. 실물경기 선행지표</dd>
+        </dl>
+        <div class="note"><strong>BOK ECOS API:</strong> 기준금리, CPI, GDP 모두 수집 가능. 거시 데이터와 주가 지수를 결합한 매크로 전략 구현에 필수</div>
+      </div>
+    </div>
+
+    <!-- 11. 뉴스/센티먼트 -->
+    <div class="domain-card" id="card-11">
+      <div class="domain-card-header" onclick="toggleCard('card-11')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="card-cat cat-news">NEWS</span>
+          <span class="card-title">뉴스 / 센티먼트</span>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="domain-card-body">
+        <dl class="kv">
+          <dt>Bullish/Bearish</dt><dd>강세(상승 기대) / 약세(하락 기대). Fear &amp; Greed Index, AAII 투자자 심리조사 등으로 측정</dd>
+          <dt>뉴스 영향도</dt><dd>공시(실적, IR), 애널리스트 리포트 목표가 변경, 금리 결정문, 지정학적 이벤트 등이 즉각적 주가 반응 유발</dd>
+          <dt>이벤트 드리븐</dt><dd>특정 이벤트(어닝 발표, FDA 승인, 계약 공시 등) 전후 가격 움직임을 노리는 전략. 단기 알파의 주요 원천</dd>
+          <dt>RAG 연결</dt><dd>LangChain RAG로 뉴스·애널리스트 리포트를 실시간 검색해 LLM 분석에 반영 → 본 프로젝트의 ResearchAgent 역할</dd>
+        </dl>
+        <div class="note"><strong>수집 소스:</strong> 한국경제 RSS, DART 공시 RSS, 네이버 금융 뉴스 API, AgenticSearch(웹 검색) 등 다각도 수집</div>
+      </div>
+    </div>
+
+    <!-- 12. 종목 스크리닝 -->
+    <div class="domain-card" id="card-12">
+      <div class="domain-card-header" onclick="toggleCard('card-12')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="card-cat cat-screen">SCREEN</span>
+          <span class="card-title">종목 스크리닝</span>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="domain-card-body">
+        <dl class="kv">
+          <dt>모멘텀 팩터</dt><dd>최근 6~12개월 수익률 상위 종목 선택. "과거 잘 오른 주식이 앞으로도 오른다"는 실증적 현상</dd>
+          <dt>밸류 팩터</dt><dd>낮은 PER, PBR, EV/EBITDA 종목 선택. 저평가된 주식의 평균회귀를 기대. 역발상 투자</dd>
+          <dt>퀄리티 팩터</dt><dd>높은 ROE, 낮은 부채비율, 안정적 이익 성장. 방어적 포트폴리오에 적합</dd>
+          <dt>복합 스크리닝</dt><dd>RSI &lt; 30 AND MACD 골든크로스 AND 거래량 &gt; 200% — 본 프로젝트 핵심 기능. 최대 5개 조건 조합</dd>
+          <dt>업종 비교</dt><dd>섹터 내 상대 순위로 필터링. 반도체 섹터 내 PER 하위 10% 종목 등. 섹터 로테이션 전략의 기본</dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- 13. M&A / 기업 이벤트 -->
+    <div class="domain-card" id="card-13">
+      <div class="domain-card-header" onclick="toggleCard('card-13')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="card-cat cat-event">EVENT</span>
+          <span class="card-title">M&amp;A / 기업 이벤트</span>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="domain-card-body">
+        <dl class="kv">
+          <dt>공개매수 (TOB)</dt><dd>Tender Offer Bid. 시장 가격보다 프리미엄(통상 20~30%) 붙여 공개 매수. 발표 즉시 주가 급등. 인수 성공 여부가 핵심 리스크</dd>
+          <dt>IPO</dt><dd>기업공개. 상장 첫날 변동성 극심. 따상(시초가 +200%) 현상. 락업(Lock-up) 해제 일정 체크 필수</dd>
+          <dt>자본구조 변경</dt><dd>유상증자(신주 발행 → 주가 희석 우려) / 자사주 매입(주가 지지 신호 / EPS 개선) / 액면분할(유동성 개선)</dd>
+          <dt>배당 이벤트</dt><dd>배당락일(ex-dividend date) 이전 매수해야 배당 수령. 배당락일 주가는 배당금만큼 하락하는 경향</dd>
+        </dl>
+        <div class="note"><strong>DART 공시 연동:</strong> 유상증자, 자사주 공시는 DART 실시간 공시 RSS로 수집 → ReportAgent의 이벤트 드리븐 섹션에 반영</div>
+      </div>
+    </div>
+
+  </div><!-- /.domain-grid -->
+</div><!-- /#panel-domain -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANEL 2 · 서비스 가입 (a)
+═══════════════════════════════════════════════════ -->
+<div id="panel-eng_a" class="panel">
+  <div class="section-header">
+    <span class="section-num">ENG (a)</span>
+    <span class="section-title">서비스 가입 가이드</span>
+  </div>
+  <div class="callout" style="margin-bottom:20px">
+    <b>목표:</b> 학교 이메일(@edu.ac.kr 등)로 아래 서비스에 가입하고 학생 인증까지 완료. 학생 요금제 및 크레딧 확보
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Azure for Students</div>
+        <div class="step-body">
+          <a href="https://azure.microsoft.com/ko-kr/free/students/" target="_blank">https://azure.microsoft.com/ko-kr/free/students/</a> 접속 → 학교 이메일로 가입<br>
+          <span class="pill pill-green">$100 크레딧</span> <span class="pill pill-yellow">12개월</span> 제공<br><br>
+          이후: Azure Portal → Azure OpenAI 리소스 생성 → GPT-4o, 임베딩 모델 배포<br>
+          본 프로젝트에서 AOAI endpoint, API key를 .env에 저장해서 사용
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">GitHub Copilot Pro (학생 무료)</div>
+        <div class="step-body">
+          <a href="https://education.github.com/discount_requests/application" target="_blank">GitHub Education 신청</a> → 학생 증빙(학생증 사진, 학교 이메일) 제출<br>
+          승인 후 Copilot Pro 무료 사용 가능<br><br>
+          <span class="pill pill-green">VS Code</span> <span class="pill pill-green">JetBrains</span> 플러그인 설치해서 코딩 생산성 향상
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">Notion Education</div>
+        <div class="step-body">
+          <a href="https://www.notion.so/ko/product/notion-for-education" target="_blank">https://www.notion.so/ko/product/notion-for-education</a><br>
+          학교 이메일로 가입 후 Education Plus 무료 적용 확인<br><br>
+          프로젝트 활용: 회의록, API 명세서, Ground Rule 문서 관리 (이미 계획서에 포함)
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">Oracle Cloud Free Tier (선택, 일반 이메일)</div>
+        <div class="step-body">
+          <a href="https://www.oracle.com/kr/cloud/free/" target="_blank">https://www.oracle.com/kr/cloud/free/</a> → 일반 이메일로 가입<br>
+          리전 선택: <span class="pill pill-blue">서울(ap-seoul-1)</span> 또는 <span class="pill pill-blue">춘천(ap-chuncheon-1)</span> 권장<br><br>
+          <b>무료 VM 인스턴스 2개</b> 생성 (ARM Ampere, 1 OCPU, 1GB RAM)<br>
+          공인 IP 영구 적용 → SSH 접속 확인 → 2FA(TOTP) 설정 완료<br><br>
+          활용 방안: SSH 터널링 테스트 서버, 리버스 프록시(Caddy/Nginx) 실습용
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <b>팁:</b> Oracle Cloud는 가입 시 신용카드 인증이 필요하지만 청구는 되지 않습니다 (Always Free 티어). ARM 인스턴스는 x86보다 성능 좋고 무료 용량이 넉넉합니다. 가입 즉시 이미지를 Oracle Linux 8로 설정하면 RHEL 8 환경 연습도 됩니다.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANEL 3 · LLM 엔지니어링 (b)
+═══════════════════════════════════════════════════ -->
+<div id="panel-eng_b" class="panel">
+  <div class="section-header">
+    <span class="section-num">ENG (b)</span>
+    <span class="section-title">LLM 엔지니어링</span>
+  </div>
+
+  <!-- b-1: Pydantic -->
+  <div class="code-section">
+    <div class="code-section-title">Pydantic Schema & Validation</div>
+    <div class="code-desc">에이전트 간 데이터 교환, LLM 출력 검증, API 요청/응답 모델링에 Pydantic을 사용합니다. 타입 안전성과 자동 직렬화를 제공합니다.</div>
+    <div class="code-wrap">
+      <div class="code-bar"><span class="code-lang">PYTHON</span><button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+<pre><code class="language-python">from pydantic import BaseModel, Field, field_validator, model_validator
+from typing import Literal, Optional
+from datetime import datetime
+from enum import Enum
+
+class SignalType(str, Enum):
+    BUY  = "BUY"
+    SELL = "SELL"
+    HOLD = "HOLD"
+
+# ─── 에이전트 출력 스키마 ───────────────────────────────────
+class TradingSignal(BaseModel):
+    ticker:      str        = Field(..., min_length=1, max_length=10, description="종목코드 (예: 005930)")
+    signal:      SignalType = Field(..., description="매수/매도/보유")
+    confidence:  float      = Field(..., ge=0.0, le=1.0, description="신뢰도 0~1")
+    price:       float      = Field(..., gt=0, description="신호 발생 시점 주가")
+    timestamp:   datetime   = Field(default_factory=datetime.now)
+    indicators:  dict[str, float] = Field(default_factory=dict, description="관련 기술지표 값")
+    reason:      str        = Field(default="", description="AI 분석 근거")
+
+    @field_validator('ticker')
+    @classmethod
+    def ticker_uppercase(cls, v: str) -> str:
+        return v.strip().upper()
+
+    @field_validator('confidence')
+    @classmethod
+    def round_confidence(cls, v: float) -> float:
+        return round(v, 4)
+
+# ─── 백테스팅 결과 스키마 ──────────────────────────────────
+class BacktestResult(BaseModel):
+    strategy_name:   str
+    start_date:      str
+    end_date:        str
+    total_return:    float   = Field(description="총 수익률 (%)")
+    cagr:            float   = Field(description="연평균 수익률 (%)")
+    mdd:             float   = Field(description="최대 낙폭 (%, 음수)")
+    sharpe_ratio:    float
+    win_rate:        float   = Field(ge=0, le=1)
+    total_trades:    int     = Field(ge=0)
+    avg_hold_days:   float
+
+    @model_validator(mode='after')
+    def validate_mdd(self) -> 'BacktestResult':
+        if self.mdd > 0:
+            raise ValueError("MDD는 음수여야 합니다 (예: -25.3)")
+        return self
+
+# ─── 사용 예시 ─────────────────────────────────────────────
+signal = TradingSignal(
+    ticker="005930",
+    signal=SignalType.BUY,
+    confidence=0.86,
+    price=88400,
+    indicators={"RSI": 28.5, "MACD": -120.3}
+)
+print(signal.model_dump_json(indent=2))
+
+# LLM JSON 출력 파싱
+import json
+llm_output = '{"ticker":"035720","signal":"SELL","confidence":0.72,"price":54200}'
+parsed = TradingSignal.model_validate(json.loads(llm_output))
+</code></pre>
+    </div>
+  </div>
+
+  <!-- b-2: Azure AOAI Web Search + Citations -->
+  <div class="code-section">
+    <div class="code-section-title">Azure AOAI — Web Search Tool + Citations 분리</div>
+    <div class="code-desc">Azure OpenAI의 built-in Bing Search 도구를 사용하면 응답에 citations가 포함됩니다. content 블록 타입을 기반으로 텍스트와 인용 출처를 분리하는 패턴입니다.</div>
+    <div class="code-wrap">
+      <div class="code-bar"><span class="code-lang">PYTHON</span><button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+<pre><code class="language-python">import os
+from openai import AzureOpenAI
+from pydantic import BaseModel
+from typing import Optional
+
+client = AzureOpenAI(
+    api_key=os.environ["AZURE_OPENAI_KEY"],
+    api_version="2025-01-01-preview",
+    azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
+)
+
+# ─── Web Search Tool 활성화 요청 ───────────────────────────
+response = client.chat.completions.create(
+    model="gpt-4o",          # Azure에서 배포한 모델명
+    messages=[
+        {
+            "role": "system",
+            "content": "당신은 금융 시장 애널리스트입니다. 최신 데이터를 검색해 분석하세요."
+        },
+        {
+            "role": "user",
+            "content": "삼성전자 현재 시장 상황과 반도체 업황 전망을 분석해주세요."
+        }
+    ],
+    tools=[
+        {
+            "type": "bing_search",      # Azure AOAI built-in tool
+            # "bing_search": {"market": "ko-KR"}  # 선택 옵션
+        }
+    ],
+    tool_choice="auto",
+    max_tokens=2000,
+)
+
+# ─── Citations 분리 로직 ───────────────────────────────────
+class Citation(BaseModel):
+    title:   str
+    url:     str
+    content: Optional[str] = None
+
+def extract_citations_and_text(response) -> tuple[str, list[Citation]]:
+    """
+    response.choices[0].message에서
+    텍스트와 citations를 분리해 반환
+    """
+    message = response.choices[0].message
+    text_parts = []
+    citations: list[Citation] = []
+
+    # context 필드에 검색 결과/citations 포함
+    if hasattr(message, 'context') and message.context:
+        raw_citations = message.context.get('citations', [])
+        for c in raw_citations:
+            citations.append(Citation(
+                title=c.get('title', ''),
+                url=c.get('url', ''),
+                content=c.get('content', '')
+            ))
+
+    # content는 텍스트 (doc_ref 형태로 [doc1] 참조 포함 가능)
+    if message.content:
+        text_parts.append(message.content)
+
+    return "\n".join(text_parts), citations
+
+analysis_text, citations = extract_citations_and_text(response)
+
+print("=== 분석 결과 ===")
+print(analysis_text)
+print("\n=== 출처 목록 ===")
+for i, c in enumerate(citations, 1):
+    print(f"[{i}] {c.title}")
+    print(f"    {c.url}")
+</code></pre>
+    </div>
+  </div>
+
+  <!-- b-3: Structured Outputs -->
+  <div class="code-section">
+    <div class="code-section-title">Azure AOAI — 구조화된 응답 (Structured Outputs)</div>
+    <div class="code-desc">response_format에 Pydantic 모델을 직접 전달하면 LLM이 항상 해당 JSON 스키마에 맞는 응답을 반환합니다. ReportAgent, BacktestCodeAgent 출력에 활용.</div>
+    <div class="code-wrap">
+      <div class="code-bar"><span class="code-lang">PYTHON</span><button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+<pre><code class="language-python">from openai import AzureOpenAI
+from pydantic import BaseModel
+from typing import Literal
+import os
+
+client = AzureOpenAI(
+    api_key=os.environ["AZURE_OPENAI_KEY"],
+    api_version="2025-01-01-preview",
+    azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
+)
+
+# ─── 원하는 출력 스키마 정의 ───────────────────────────────
+class StrategyImprovement(BaseModel):
+    summary:          str
+    strengths:        list[str]
+    weaknesses:       list[str]
+    recommendations:  list[str]
+    risk_level:       Literal["LOW", "MEDIUM", "HIGH"]
+    market_suitability: str  # 예: "추세장 적합, 횡보장 비적합"
+
+class MarketSignal(BaseModel):
+    ticker:      str
+    action:      Literal["BUY", "SELL", "HOLD"]
+    target_price: float
+    stop_loss:    float
+    rationale:    str
+    confidence:   float
+
+# ─── Structured Output 요청 ────────────────────────────────
+# client.beta.chat.completions.parse() 사용
+backtest_result_json = """
+{
+  "strategy": "RSI_30_MACD_CROSS",
+  "total_return": 45.2,
+  "mdd": -28.4,
+  "sharpe": 0.87,
+  "win_rate": 0.54,
+  "period": "2014-2024"
+}
+"""
+
+response = client.beta.chat.completions.parse(
+    model="gpt-4o",
+    messages=[
+        {
+            "role": "system",
+            "content": "백테스팅 결과를 분석하고 전략 개선 방안을 JSON으로 반환하세요."
+        },
+        {
+            "role": "user",
+            "content": f"다음 백테스팅 결과를 분석해주세요:\n{backtest_result_json}"
+        }
+    ],
+    response_format=StrategyImprovement,  # ← Pydantic 모델 직접 전달
+    max_tokens=1000,
+)
+
+# ─── 결과는 이미 파싱된 Pydantic 객체 ─────────────────────
+result: StrategyImprovement = response.choices[0].message.parsed
+print(f"리스크 수준: {result.risk_level}")
+print(f"강점: {result.strengths}")
+print(f"개선 권장사항:")
+for r in result.recommendations:
+    print(f"  · {r}")
+
+# ─── dict/json 변환 ────────────────────────────────────────
+result_dict = result.model_dump()
+result_json = result.model_dump_json(indent=2)
+</code></pre>
+    </div>
+  </div>
+
+  <!-- b-4: SSH Tunneling -->
+  <div class="code-section">
+    <div class="code-section-title">SSH Tunneling & 리버스 프록시</div>
+    <div class="code-desc">온프레미스 서버(RHEL)와 Azure/OCI VM 간 통신, 또는 로컬 서비스를 외부에 노출할 때 사용. 금융사 망분리 환경 모방의 핵심 인프라 개념.</div>
+    <div class="code-wrap">
+      <div class="code-bar"><span class="code-lang">BASH</span><button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+<pre><code class="language-bash"># ═══ 포워드 터널 (Local Forwarding) ═══════════════════════
+# 로컬 8080 → 원격 서버의 내부 서비스 3000 접근
+ssh -L 8080:localhost:3000 user@remote-server.com
+
+# ═══ 리버스 터널 (Remote Forwarding) ══════════════════════
+# 로컬 머신의 5000 포트를 원격 서버 9000으로 노출
+# (NAT 뒤에 있는 개발 서버를 외부에 임시 노출)
+ssh -R 9000:localhost:5000 user@remote-server.com
+
+# ═══ 영구 터널 (AutoSSH / systemd) ═══════════════════════
+# 1. autossh 설치
+sudo dnf install autossh -y  # RHEL 8
+
+# 2. /etc/systemd/system/ssh-tunnel.service
+cat > /etc/systemd/system/ssh-tunnel.service << 'EOF'
+[Unit]
+Description=SSH Reverse Tunnel to Azure
+After=network.target
+
+[Service]
+User=tunnel
+ExecStart=/usr/bin/autossh -M 0 -N \
+  -o "ServerAliveInterval=30" \
+  -o "ServerAliveCountMax=3" \
+  -o "ExitOnForwardFailure=yes" \
+  -R 0.0.0.0:8443:localhost:8000 \
+  -i /home/tunnel/.ssh/id_rsa \
+  azure-vm-user@YOUR_AZURE_VM_IP
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl enable --now ssh-tunnel
+
+# ═══ 리버스 프록시 (Caddy — 자동 HTTPS) ═══════════════════
+# Caddyfile 예시
+cat > /etc/caddy/Caddyfile << 'EOF'
+quant.yourdomain.com {
+    reverse_proxy localhost:8000
+    encode gzip
+}
+
+api.yourdomain.com {
+    reverse_proxy localhost:8000 {
+        header_up X-Real-IP {remote_host}
+    }
+}
+EOF
+systemctl reload caddy
+
+# ═══ OCI VM → 공인IP 영구 적용 ════════════════════════════
+# OCI 콘솔 → Networking → Reserved Public IPs → IP 예약
+# 인스턴스에 예약 IP 연결 후 SSH 접속 확인:
+ssh -i ~/.ssh/oci_key opc@YOUR_RESERVED_IP
+</code></pre>
+    </div>
+  </div>
+
+  <!-- b-5: GitHub LFS -->
+  <div class="code-section">
+    <div class="code-section-title">GitHub LFS — 100MB 이상 대용량 파일 처리</div>
+    <div class="code-desc">TimescaleDB 덤프, 10년치 OHLCV 파케이, 학습된 모델 가중치 등은 일반 git commit이 불가능합니다. Git LFS로 처리하세요.</div>
+    <div class="code-wrap">
+      <div class="code-bar"><span class="code-lang">BASH</span><button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+<pre><code class="language-bash"># ═══ 설치 ═══════════════════════════════════════════════
+# macOS
+brew install git-lfs
+# Ubuntu / RHEL
+sudo apt install git-lfs  # or: sudo dnf install git-lfs
+git lfs install  # 전역 훅 설치
+
+# ═══ 추적 패턴 등록 ══════════════════════════════════════
+cd your-repo
+git lfs track "*.parquet"      # 주가 데이터
+git lfs track "*.pkl"          # 직렬화된 모델/데이터
+git lfs track "data/*.csv"     # 대용량 CSV
+git lfs track "models/**"      # 모델 디렉토리 전체
+git lfs track "*.db"           # SQLite 등
+
+# .gitattributes 커밋 (반드시!)
+git add .gitattributes
+git commit -m "chore: add LFS tracking rules"
+
+# ═══ 이후 일반 워크플로우와 동일 ════════════════════════
+git add data/kospi200_ohlcv_10y.parquet
+git commit -m "feat: add 10-year OHLCV dataset"
+git push origin main  # LFS 포인터 파일만 git에, 실제 파일은 LFS 서버에 저장
+
+# ═══ 대안: DVC (Data Version Control) ═══════════════════
+# LFS 한도(1GB 무료)를 초과하거나 S3/Azure Blob 연동이 필요한 경우
+pip install dvc dvc-azure
+dvc init
+dvc remote add -d azure_store azure://your-container/path
+dvc add data/large_dataset.parquet
+git add data/large_dataset.parquet.dvc .gitignore
+git commit -m "feat: track dataset with DVC"
+dvc push
+</code></pre>
+    </div>
+  </div>
+
+  <!-- b-6: Slack API -->
+  <div class="code-section">
+    <div class="code-section-title">Slack API — 메시지 발송 (1:1 + 채널 공지)</div>
+    <div class="code-desc">ReportAgent의 알림 발송 채널로 Slack을 사용. Brevo(이메일)와 함께 투자 리포트 전달 수단.</div>
+    <div class="code-wrap">
+      <div class="code-bar"><span class="code-lang">PYTHON</span><button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+<pre><code class="language-python">import os
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
+
+# pip install slack_sdk
+# Slack App: https://api.slack.com/apps → Bot Token Scopes: chat:write, im:write, users:read
+
+client = WebClient(token=os.environ["SLACK_BOT_TOKEN"])
+
+# ─── 1:1 다이렉트 메시지 ──────────────────────────────────
+def send_dm(user_email: str, text: str) -> bool:
+    try:
+        # 이메일로 user_id 조회
+        resp = client.users_lookupByEmail(email=user_email)
+        user_id = resp["user"]["id"]
+
+        # DM 채널 열기
+        dm = client.conversations_open(users=[user_id])
+        channel_id = dm["channel"]["id"]
+
+        # 메시지 발송
+        client.chat_postMessage(
+            channel=channel_id,
+            text=text,
+            unfurl_links=False,
+        )
+        return True
+    except SlackApiError as e:
+        print(f"Slack 오류: {e.response['error']}")
+        return False
+
+# ─── 채널 공지 (Block Kit 리치 메시지) ────────────────────
+def send_signal_alert(channel: str, ticker: str, signal: str,
+                      price: float, confidence: float, reason: str):
+    color = "#00d4aa" if signal == "BUY" else "#f87171"
+    emoji = "🟢" if signal == "BUY" else "🔴"
+
+    blocks = [
+        {
+            "type": "header",
+            "text": {"type": "plain_text", "text": f"{emoji} QuantAgent 매매 신호"}
+        },
+        {
+            "type": "section",
+            "fields": [
+                {"type": "mrkdwn", "text": f"*종목*\n{ticker}"},
+                {"type": "mrkdwn", "text": f"*신호*\n{signal}"},
+                {"type": "mrkdwn", "text": f"*현재가*\n₩{price:,.0f}"},
+                {"type": "mrkdwn", "text": f"*신뢰도*\n{confidence:.0%}"},
+            ]
+        },
+        {"type": "divider"},
+        {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": f"*분석 근거*\n{reason}"}
+        }
+    ]
+
+    try:
+        client.chat_postMessage(
+            channel=channel,
+            text=f"{ticker} {signal} 신호",   # fallback text
+            blocks=blocks,
+            attachments=[{"color": color}]
+        )
+    except SlackApiError as e:
+        print(f"채널 발송 실패: {e.response['error']}")
+
+# ─── 사용 예시 ─────────────────────────────────────────────
+send_dm("analyst@yourcompany.com", "오늘의 일일 리포트가 생성되었습니다.")
+send_signal_alert(
+    channel="#quant-signals",
+    ticker="삼성전자(005930)",
+    signal="BUY",
+    price=88400,
+    confidence=0.86,
+    reason="RSI 28.5 과매도 구간 진입 + MACD 골든크로스 확인"
+)
+</code></pre>
+    </div>
+  </div>
+</div><!-- /#panel-eng_b -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANEL 4 · 데이터 API (c)
+═══════════════════════════════════════════════════ -->
+<div id="panel-eng_c" class="panel">
+  <div class="section-header">
+    <span class="section-num">ENG (c)</span>
+    <span class="section-title">데이터 API</span>
+  </div>
+  <div class="callout" style="margin-bottom:20px">
+    <b>핵심 목표:</b> 어떤 API가 무엇을 제공하는지 직접 테스트해서 "목적에 따라 무엇을 써야 하는지" 판단 기준을 갖추세요.
+  </div>
+
+  <table class="styled-table" style="margin-bottom:24px">
+    <thead><tr><th>API</th><th>주요 데이터</th><th>장점</th><th>한계</th></tr></thead>
+    <tbody>
+      <tr><td>KIS Open API</td><td>실시간 시세, 일봉/분봉, 체결, 호가, 잔고</td><td>실시간 WebSocket, 모의투자 환경, 국내 최고 품질</td><td>개인 계좌 연동 필요, 요청 제한</td></tr>
+      <tr><td>KRX OpenAPI</td><td>종목 기본 정보, 지수, 투자자별 거래</td><td>공식 거래소 데이터, 무료</td><td>실시간 없음, 전일 EOD 기준</td></tr>
+      <tr><td>BOK ECOS</td><td>기준금리, CPI, GDP, 환율, 통화량</td><td>거시지표 완결성 높음</td><td>주식 데이터 없음, 월별/분기별</td></tr>
+      <tr><td>FSS DART</td><td>공시, 재무제표, 감사보고서</td><td>상장사 전 종목 재무 데이터</td><td>실시간 아님, 파싱 필요</td></tr>
+    </tbody>
+  </table>
+
+  <!-- KIS API -->
+  <div class="code-section">
+    <div class="code-section-title">KIS Open API — 모의투자 세팅 & 주가 조회</div>
+    <div class="code-desc">한국투자증권 Open API. 모의투자 계좌 신규 → API 키 발급 → 액세스 토큰 획득 → 시세 조회 순서.</div>
+    <div class="code-wrap">
+      <div class="code-bar"><span class="code-lang">PYTHON</span><button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+<pre><code class="language-python">import os, requests
+from datetime import datetime, timedelta
+import pandas as pd
+
+# ─── 환경 변수 (.env) ─────────────────────────────────────
+# KIS_APP_KEY=PSxxxxxxxx
+# KIS_APP_SECRET=xxxxxxxxxxxxxxxxxxxx
+# KIS_ACCOUNT_NO=12345678-01  (모의투자 계좌번호)
+# KIS_IS_VIRTUAL=true          (모의투자 여부)
+
+BASE_URL_REAL    = "https://openapi.koreainvestment.com:9443"
+BASE_URL_VIRTUAL = "https://openapivts.koreainvestment.com:29443"  # 모의투자
+
+def get_base_url() -> str:
+    return BASE_URL_VIRTUAL if os.getenv("KIS_IS_VIRTUAL", "true") == "true" else BASE_URL_REAL
+
+# ─── 액세스 토큰 발급 ─────────────────────────────────────
+def get_access_token() -> str:
+    url = f"{get_base_url()}/oauth2/tokenP"
+    body = {
+        "grant_type": "client_credentials",
+        "appkey":     os.environ["KIS_APP_KEY"],
+        "appsecret":  os.environ["KIS_APP_SECRET"],
+    }
+    resp = requests.post(url, json=body)
+    resp.raise_for_status()
+    return resp.json()["access_token"]
+
+TOKEN = get_access_token()
+
+def get_headers(tr_id: str) -> dict:
+    return {
+        "authorization":  f"Bearer {TOKEN}",
+        "appkey":          os.environ["KIS_APP_KEY"],
+        "appsecret":       os.environ["KIS_APP_SECRET"],
+        "tr_id":           tr_id,
+        "Content-Type":    "application/json; charset=UTF-8",
+    }
+
+# ─── 현재가 조회 ──────────────────────────────────────────
+def get_current_price(ticker: str) -> dict:
+    """VTTC8434R: 모의투자 주식 현재가 시세"""
+    tr_id = "VTTC8434R" if os.getenv("KIS_IS_VIRTUAL") == "true" else "FHKST01010100"
+    resp = requests.get(
+        f"{get_base_url()}/uapi/domestic-stock/v1/quotations/inquire-price",
+        headers=get_headers(tr_id),
+        params={
+            "FID_COND_MRKT_DIV_CODE": "J",   # J=주식
+            "FID_INPUT_ISCD": ticker,
+        }
+    )
+    data = resp.json()["output"]
+    return {
+        "ticker":  ticker,
+        "price":   int(data["stck_prpr"]),     # 현재가
+        "open":    int(data["stck_oprc"]),     # 시가
+        "high":    int(data["stck_hgpr"]),     # 고가
+        "low":     int(data["stck_lwpr"]),     # 저가
+        "volume":  int(data["acml_vol"]),      # 거래량
+        "change_rate": float(data["prdy_ctrt"]),  # 전일 대비율
+    }
+
+# ─── 일봉 데이터 조회 (최근 30일) ────────────────────────
+def get_daily_ohlcv(ticker: str, days: int = 30) -> pd.DataFrame:
+    end_dt   = datetime.now().strftime("%Y%m%d")
+    start_dt = (datetime.now() - timedelta(days=days)).strftime("%Y%m%d")
+
+    resp = requests.get(
+        f"{get_base_url()}/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice",
+        headers=get_headers("FHKST03010100"),
+        params={
+            "FID_COND_MRKT_DIV_CODE": "J",
+            "FID_INPUT_ISCD":   ticker,
+            "FID_INPUT_DATE_1": start_dt,
+            "FID_INPUT_DATE_2": end_dt,
+            "FID_PERIOD_DIV_CODE": "D",  # D=일봉
+            "FID_ORG_ADJ_PRC":    "0",  # 0=수정주가
+        }
+    )
+    rows = resp.json().get("output2", [])
+    df = pd.DataFrame(rows)[["stck_bsop_date","stck_oprc","stck_hgpr",
+                               "stck_lwpr","stck_clpr","acml_vol"]]
+    df.columns = ["date","open","high","low","close","volume"]
+    df[["open","high","low","close","volume"]] = df[["open","high","low","close","volume"]].astype(int)
+    df["date"] = pd.to_datetime(df["date"])
+    return df.sort_values("date").reset_index(drop=True)
+
+# ─── 테스트 ───────────────────────────────────────────────
+print(get_current_price("005930"))   # 삼성전자
+df = get_daily_ohlcv("005930", days=30)
+print(df.tail())
+</code></pre>
+    </div>
+  </div>
+
+  <!-- KRX API -->
+  <div class="code-section">
+    <div class="code-section-title">KRX OpenAPI — 종목 기본 정보 & 비교</div>
+    <div class="code-desc">한국거래소 Open API. KIS는 실시간·틱 데이터 강점, KRX는 종목 마스터·투자자별 매매·지수 데이터 강점.</div>
+    <div class="code-wrap">
+      <div class="code-bar"><span class="code-lang">PYTHON</span><button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+<pre><code class="language-python">import requests
+import pandas as pd
+
+# KRX Open API: https://openapi.krx.co.kr
+# 회원가입 → API 신청 → auth_key 발급 (1~2 영업일)
+
+KRX_AUTH_KEY = "your_krx_auth_key"
+KRX_BASE = "http://data-dbg.krx.co.kr/svc/apis"
+
+def get_krx_stock_list(date: str = "20240101") -> pd.DataFrame:
+    """KOSPI 전 종목 기본 정보 조회"""
+    resp = requests.post(
+        f"{KRX_BASE}/sto/stk_isu_base_info",
+        data={
+            "AUTH_KEY": KRX_AUTH_KEY,
+            "basDd":    date,   # 기준일자 YYYYMMDD
+        }
+    )
+    data = resp.json()["OutBlock_1"]
+    df = pd.DataFrame(data)
+    return df[["ISU_CD","ISU_SRT_CD","ISU_NM","MKT_TP_NM",
+               "SECT_TP_NM","KIND_STKCERT_TP_NM"]]
+    # ISU_SRT_CD = 단축 종목코드 (6자리)
+
+def get_krx_daily_price(ticker: str, date: str) -> dict:
+    """개별 종목 일별 시세"""
+    resp = requests.post(
+        f"{KRX_BASE}/sto/stk_bydd_trd",
+        data={
+            "AUTH_KEY": KRX_AUTH_KEY,
+            "ISU_CD":   ticker,
+            "fromDd":   date,
+            "toDd":     date,
+        }
+    )
+    return resp.json().get("OutBlock_1", [{}])[0]
+
+# ─── KIS vs KRX 비교 ──────────────────────────────────────
+# KIS  강점: 실시간 WebSocket 시세, 분봉/틱 데이터, 모의투자 주문
+# KIS  한계: 개인 증권 계좌 필요, 분봉은 최근 30일만 제공
+# KRX  강점: 거래소 공식 데이터, 투자자별 매매(기관/외인/개인), 지수 데이터
+# KRX  한계: EOD 데이터만 (실시간 없음), API 신청 후 승인 필요
+# 결론: 실시간/분봉 → KIS / 종목 마스터·투자자동향 → KRX 병용
+</code></pre>
+    </div>
+  </div>
+
+  <!-- BOK & FSS -->
+  <div class="code-section">
+    <div class="code-section-title">BOK ECOS API + FSS DART API</div>
+    <div class="code-wrap">
+      <div class="code-bar"><span class="code-lang">PYTHON</span><button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+<pre><code class="language-python">import os, requests, pandas as pd
+
+BOK_API_KEY = os.environ["BOK_API_KEY"]   # https://ecos.bok.or.kr → 개발자 등록
+FSS_API_KEY = os.environ["FSS_API_KEY"]   # https://opendart.fss.or.kr → API 신청
+
+# ══════════════════════════════════════════════════════════
+# ① BOK ECOS — 기준금리, CPI, 환율 수집
+# ══════════════════════════════════════════════════════════
+def get_bok_data(stat_code: str, item_code: str,
+                 cycle: str, start: str, end: str) -> pd.DataFrame:
+    """
+    stat_code  : 통계표 코드  (예: 722Y001 = 기준금리)
+    item_code  : 항목 코드    (예: 0101000)
+    cycle      : 주기         (M=월, Q=분기, A=연)
+    start/end  : YYYYMM 형식
+    """
+    url = (f"https://ecos.bok.or.kr/api/StatisticSearch/"
+           f"{BOK_API_KEY}/json/kr/1/1000/"
+           f"{stat_code}/{cycle}/{start}/{end}/{item_code}")
+    resp = requests.get(url)
+    rows = resp.json()["StatisticSearch"]["row"]
+    df = pd.DataFrame(rows)[["TIME","DATA_VALUE"]]
+    df.columns = ["date","value"]
+    df["value"] = pd.to_numeric(df["value"], errors="coerce")
+    return df
+
+# 주요 stat_code 목록:
+# 722Y001 / 0101000 : 한국은행 기준금리 (M)
+# 901Y009 / 0           : CPI 전국 (M)
+# 731Y001 / 0000001  : 원/달러 환율 (M)
+
+base_rate = get_bok_data("722Y001", "0101000", "M", "202301", "202503")
+print(base_rate.tail(5))
+
+# ══════════════════════════════════════════════════════════
+# ② FSS DART — 상장사 재무제표 수집
+# ══════════════════════════════════════════════════════════
+def get_dart_financial(corp_code: str, year: str, report_type: str = "11011") -> dict:
+    """
+    corp_code   : DART 고유번호 (종목코드 아님! 별도 조회 필요)
+    year        : 사업연도 (2023)
+    report_type : 11011=사업보고서, 11012=반기, 11013=분기
+    """
+    resp = requests.get(
+        "https://opendart.fss.or.kr/api/fnlttSinglAcntAll.json",
+        params={
+            "crtfc_key": FSS_API_KEY,
+            "corp_code":   corp_code,
+            "bsns_year":   year,
+            "reprt_code":  report_type,
+            "fs_div":       "CFS",  # CFS=연결, OFS=별도
+        }
+    )
+    return resp.json()
+
+def get_corp_code_by_name(company_name: str) -> str:
+    """회사명으로 DART 고유번호 조회"""
+    resp = requests.get(
+        "https://opendart.fss.or.kr/api/company.json",
+        params={
+            "crtfc_key":    FSS_API_KEY,
+            "corp_name":    company_name,
+            "page_no":      1,
+            "page_count":   10,
+        }
+    )
+    corps = resp.json().get("list", [])
+    # 상장사만 필터
+    listed = [c for c in corps if c["stock_code"]]
+    return listed[0]["corp_code"] if listed else None
+
+# 삼성전자 재무제표
+corp_code = get_corp_code_by_name("삼성전자")
+fs = get_dart_financial(corp_code, "2023")
+print(f"항목 수: {len(fs.get('list', []))}")
+</code></pre>
+    </div>
+  </div>
+</div><!-- /#panel-eng_c -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANEL 5 · Rate Limit 극복 (d)
+═══════════════════════════════════════════════════ -->
+<div id="panel-eng_d" class="panel">
+  <div class="section-header">
+    <span class="section-num">ENG (d)</span>
+    <span class="section-title">Rate Limit 극복 — Gemini API Key Pool Rotation</span>
+  </div>
+
+  <div class="callout" style="margin-bottom:20px">
+    <b>배경:</b> Gemini 무료 티어는 분당 15회, 일 1,500회 제한. Google Cloud 프로젝트 10개를 생성하고 프로젝트별 Gemini API Key를 하나씩 발급받으면 실질적으로 10배의 Rate Limit을 활용할 수 있습니다.
+  </div>
+
+  <div class="steps" style="margin-bottom:24px">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Google Cloud 프로젝트 10개 생성</div>
+        <div class="step-body">
+          <a href="https://console.cloud.google.com/" target="_blank">console.cloud.google.com</a> → 상단 프로젝트 선택 → "새 프로젝트"<br>
+          이름 예시: quant-agent-01 ~ quant-agent-10<br>
+          무료 계정으로 프로젝트당 1개 API Key 발급 가능
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">각 프로젝트에서 Generative Language API 활성화 & Key 발급</div>
+        <div class="step-body">
+          프로젝트 선택 → APIs & Services → Enable APIs → "Generative Language API" 검색 → 활성화<br>
+          Credentials → Create Credentials → API Key → 복사<br>
+          총 10개 키를 .env 파일에 저장
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">Key Pool Rotation 코드 구현 및 테스트</div>
+        <div class="step-body">아래 코드 참고. 429(RESOURCE_EXHAUSTED) 발생 시 다음 키로 자동 교체</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-section">
+    <div class="code-section-title">.env — API Key Pool 설정</div>
+    <div class="code-wrap">
+      <div class="code-bar"><span class="code-lang">ENV</span><button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+<pre><code class="language-bash"># .env
+GEMINI_API_KEY_1=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXX_01
+GEMINI_API_KEY_2=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXX_02
+GEMINI_API_KEY_3=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXX_03
+GEMINI_API_KEY_4=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXX_04
+GEMINI_API_KEY_5=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXX_05
+GEMINI_API_KEY_6=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXX_06
+GEMINI_API_KEY_7=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXX_07
+GEMINI_API_KEY_8=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXX_08
+GEMINI_API_KEY_9=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXX_09
+GEMINI_API_KEY_10=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXX_10
+</code></pre>
+    </div>
+  </div>
+
+  <div class="code-section">
+    <div class="code-section-title">GeminiKeyPool — 구현 및 테스트</div>
+    <div class="code-wrap">
+      <div class="code-bar"><span class="code-lang">PYTHON</span><button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+<pre><code class="language-python">"""
+gemini_pool.py  —  Gemini API Key Rotation Pool
+pip install google-generativeai python-dotenv
+"""
+import os, time, logging
+from itertools import cycle
+from threading import Lock
+from typing import Optional
+from dotenv import load_dotenv
+import google.generativeai as genai
+
+load_dotenv()
+logger = logging.getLogger(__name__)
+
+# ─── Key Pool 로드 ────────────────────────────────────────
+def _load_keys() -> list[str]:
+    keys = []
+    i = 1
+    while True:
+        key = os.getenv(f"GEMINI_API_KEY_{i}")
+        if not key:
+            break
+        keys.append(key)
+        i += 1
+    if not keys:
+        raise ValueError("GEMINI_API_KEY_1 이상 환경변수 필요")
+    logger.info(f"Gemini Key Pool: {len(keys)}개 로드됨")
+    return keys
+
+class GeminiKeyPool:
+    """Thread-safe Gemini API Key Rotation Pool"""
+
+    def __init__(self, model_name: str = "gemini-2.0-flash-lite"):
+        self._keys       = _load_keys()
+        self._pool       = cycle(self._keys)
+        self._lock       = Lock()
+        self._model_name = model_name
+        self._current    = next(self._pool)
+        self._exhausted: set[str] = set()
+
+    def _next_key(self) -> Optional[str]:
+        """다음 유효한 키 반환. 모두 소진 시 None"""
+        with self._lock:
+            tried = 0
+            while tried < len(self._keys):
+                key = next(self._pool)
+                if key not in self._exhausted:
+                    self._current = key
+                    return key
+                tried += 1
+            return None
+
+    def generate(self, prompt: str, max_retries: int = None) -> str:
+        """
+        Rate Limit 발생 시 자동으로 다음 키로 교체 후 재시도
+        max_retries 기본값 = 보유 키 수
+        """
+        if max_retries is None:
+            max_retries = len(self._keys)
+
+        last_error = None
+        for attempt in range(max_retries):
+            current_key = self._current
+            try:
+                genai.configure(api_key=current_key)
+                model = genai.GenerativeModel(self._model_name)
+                response = model.generate_content(prompt)
+                return response.text
+
+            except Exception as e:
+                err_str = str(e)
+                # Rate Limit 감지
+                if any(x in err_str for x in ["429", "RESOURCE_EXHAUSTED",
+                                                "quota", "rate limit"]):
+                    logger.warning(f"Rate limit (키 #{self._keys.index(current_key)+1}) "
+                                   f"→ 다음 키로 교체")
+                    self._exhausted.add(current_key)
+                    next_key = self._next_key()
+                    if next_key is None:
+                        logger.error("모든 API 키 소진 → 60초 대기 후 재시도")
+                        self._exhausted.clear()  # 리셋 (1분 후 다시 사용 가능)
+                        time.sleep(60)
+                        self._next_key()
+                    time.sleep(1)
+                    last_error = e
+                else:
+                    raise  # 다른 에러는 그대로 전파
+
+        raise Exception(f"모든 재시도 실패. 마지막 오류: {last_error}")
+
+    def get_status(self) -> dict:
+        return {
+            "total_keys":     len(self._keys),
+            "exhausted_keys": len(self._exhausted),
+            "active_keys":    len(self._keys) - len(self._exhausted),
+            "current_key_idx": self._keys.index(self._current) + 1,
+        }
+
+# ─── 전역 인스턴스 (싱글톤) ──────────────────────────────
+_pool_instance: Optional[GeminiKeyPool] = None
+
+def get_gemini_pool() -> GeminiKeyPool:
+    global _pool_instance
+    if _pool_instance is None:
+        _pool_instance = GeminiKeyPool()
+    return _pool_instance
+
+# ─── LangChain LLM Wrapper (에이전트 연동) ───────────────
+from langchain_core.language_models import BaseLLM
+from langchain_core.outputs import LLMResult, Generation
+
+class GeminiPoolLLM(BaseLLM):
+    """LangChain에서 Key Pool을 사용하는 Gemini LLM"""
+    pool: GeminiKeyPool = None
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.pool = get_gemini_pool()
+
+    def _generate(self, prompts, stop=None, **kwargs) -> LLMResult:
+        generations = []
+        for prompt in prompts:
+            text = self.pool.generate(prompt)
+            generations.append([Generation(text=text)])
+        return LLMResult(generations=generations)
+
+    @property
+    def _llm_type(self) -> str:
+        return "gemini_pool"
+
+# ─── 테스트 실행 ──────────────────────────────────────────
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    pool = get_gemini_pool()
+
+    # 반복 호출로 Rate Limit 테스트
+    for i in range(20):
+        try:
+            result = pool.generate(f"삼성전자 투자 의견 한 줄 요약 #{i+1}")
+            print(f"[{i+1}] {result[:60]}...")
+            status = pool.get_status()
+            print(f"     Key 상태: {status}")
+        except Exception as e:
+            print(f"[{i+1}] 오류: {e}")
+        time.sleep(0.5)
+</code></pre>
+    </div>
+  </div>
+
+  <div class="callout info" style="margin-top:12px">
+    <b>참고:</b> Azure AOAI에서는 모델 배포 단위로 TPM(Tokens Per Minute) 제한이 있습니다. Azure의 경우 동일한 Key Rotation 패턴을 배포 이름(deployment_name)을 변경하는 방식으로 응용할 수 있습니다. 여러 리전(eastus, westus, swedencentral)에 동일 모델 배포 후 엔드포인트를 rotation하는 방식이 프로덕션에서 자주 사용됩니다.
+  </div>
+</div><!-- /#panel-eng_d -->
+
+</div><!-- /.content -->
+
+<script>
+// Tab switching
+function switchTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// Domain card toggle
+function toggleCard(id) {
+  const card = document.getElementById(id);
+  const isOpen = card.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.domain-card').forEach(c => c.classList.remove('open'));
+  if (!isOpen) card.classList.add('open');
+}
+
+// Copy code
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre code');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'COPIED';
+    setTimeout(() => btn.textContent = 'COPY', 2000);
+  });
+}
+
+// Init highlight.js
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('pre code').forEach(el => {
+    hljs.highlightElement(el);
+  });
+});
+</script>
+</body>
+</html>
