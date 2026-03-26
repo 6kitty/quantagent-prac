@@ -1,1 +1,6 @@
 .env
+.py*
+pypro*
+uv.lock
+.venv
+.claude

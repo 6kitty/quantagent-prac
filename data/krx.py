@@ -1,12 +1,13 @@
 import requests
 import pandas as pd
+import os, requests
 from dotenv import load_dotenv
 load_dotenv()
 
 # KRX Open API: https://openapi.krx.co.kr
 # 회원가입 → API 신청 → auth_key 발급 (1~2 영업일)
 
-KRX_AUTH_KEY = "your_krx_auth_key"
+KRX_AUTH_KEY = os.getenv("KRX_AUTH_KEY")
 KRX_BASE = "http://data-dbg.krx.co.kr/svc/apis"
 
 def get_krx_stock_list(date: str = "20240101") -> pd.DataFrame:
@@ -37,6 +38,9 @@ def get_krx_daily_price(ticker: str, date: str) -> dict:
     )
     return resp.json().get("OutBlock_1", [{}])[0]
 
+if __name__ == "__main__":
+    df = get_krx_stock_list("20260326")
+    print(df)
 # ─── KIS vs KRX 비교 ──────────────────────────────────────
 # KIS  강점: 실시간 WebSocket 시세, 분봉/틱 데이터, 모의투자 주문
 # KIS  한계: 개인 증권 계좌 필요, 분봉은 최근 30일만 제공
