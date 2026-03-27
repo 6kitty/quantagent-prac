@@ -1,0 +1,132 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  "providers": {
+
+    "qwen": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Alibaba Cloud – Qwen3-Coder",
+      "options": {
+        "baseURL": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+        "apiKey": "{env:DASHSCOPE_API_KEY}"
+      },
+      "models": {
+        "qwen3-coder-plus": {
+          "name": "Qwen3-Coder Plus",
+          "limit": 131072
+        },
+        "qwen3-coder-plus-2025-09-23": {
+          "name": "Qwen3-Coder Plus (2025-09-23 snapshot)",
+          "limit": 131072
+        },
+        "qwen3-coder-next": {
+          "name": "Qwen3-Coder Next (preview)",
+          "limit": 65536
+        }
+      }
+    },
+
+    "azure-codex": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Azure OpenAI – Codex",
+      "options": {
+        "baseURL": "https://{env:AOAI_RESOURCE_NAME}.openai.azure.com/openai/v1",
+        "apiKey": "{env:AOAI_API_KEY}",
+        "headers": {
+          "api-key": "{env:AOAI_API_KEY}"
+        }
+      },
+      "models": {
+        "gpt-5-codex": {
+          "name": "GPT-5 Codex",
+          "limit": 200000
+        }
+      }
+    }
+  },
+
+
+  "model": "qwen/qwen3-coder-plus",
+
+  "mcp": {
+
+    "filesystem": {
+      "type": "local",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "{env:HOME}/projects"       
+      ]
+    },
+
+    "github": {
+      "type": "local",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "{env:GITHUB_TOKEN}"
+      }
+    },
+
+
+    "memory": {
+      "type": "local",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+
+
+    "sqlite": {
+      "type": "local",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sqlite",
+        "--db-path",
+        "{env:HOME}/projects/local.db"
+      ]
+    },
+
+    "brave-search": {
+      "type": "local",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "{env:BRAVE_API_KEY}"
+      }
+    },
+
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp"
+    },
+
+    "grep-app": {
+      "type": "remote",
+      "url": "https://mcp.grep.app/mcp"
+    },
+
+    "exa-search": {
+      "type": "remote",
+      "url": "https://mcp.exa.ai/mcp",
+      "headers": {
+        "x-api-key": "{env:EXA_API_KEY}"
+      }
+    },
+    "fetch": {
+      "type": "local",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"]
+    }
+  },
+
+  "keybindings": {
+    "leader": "ctrl+x"
+  },
+
+  "aliases": {
+    "qwen": "qwen/qwen3-coder-plus",
+    "codex": "azure-codex/gpt-5-codex"
+  }
+}
