@@ -143,7 +143,7 @@ source ~/.env.opencode
 | 2 | `github` | local | 이슈·PR·커밋·코드 검색 | `GITHUB_TOKEN` |
 | 3 | `memory` | local | 지식 그래프 기반 장기 기억 | 없음 |
 | 4 | `sqlite` | local | 로컬 SQLite DB 쿼리·분석 | 없음 |
-| 5 | `brave-search` | local | 실시간 웹·뉴스·로컬 검색 | `BRAVE_API_KEY` |
+| 5 | `duckduckgo` | local | 무료 실시간 웹 검색 (API 키 불필요) | 없음 |
 | 6 | `context7` | remote | 라이브러리 공식 문서 조회 (OMO 번들) | 없음 |
 | 7 | `grep-app` | remote | GitHub 전체 코드 초고속 검색 (OMO 번들) | 없음 |
 | 8 | `exa-search` | remote | Exa AI 웹 검색 (OMO 번들) | `EXA_API_KEY` |

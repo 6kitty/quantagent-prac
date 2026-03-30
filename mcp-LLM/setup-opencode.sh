@@ -37,7 +37,7 @@ MCPS=(
   "@modelcontextprotocol/server-github"
   "@modelcontextprotocol/server-memory"
   "@modelcontextprotocol/server-sqlite"
-  "@modelcontextprotocol/server-brave-search"
+  "duckduckgo-mcp-server"
   "@modelcontextprotocol/server-fetch"
 )
 for pkg in "${MCPS[@]}"; do
