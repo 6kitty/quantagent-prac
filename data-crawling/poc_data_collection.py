@@ -39,19 +39,6 @@ load_dotenv()
 # 환경변수 우선, 없으면 하드코딩 자리 표시자
 # ──────────────────────────────────────────────────────────
 def _build_llm_client():
-    """
-    AOAI(Azure OpenAI) 또는 OpenAI 클라이언트를 반환합니다.
-
-    AOAI 환경변수 (Azure 포털 '키 및 엔드포인트' 탭 기준):
-        AOAI_KEY        - API 키 (KEY 1 또는 KEY 2)
-        AOAI_ENDPOINT   - 엔드포인트 ex) https://YOUR-RESOURCE.openai.azure.com/
-        AOAI_REGION     - 서비스 지역 ex) eastus
-        AOAI_DEPLOYMENT - 배포 이름 ex) gpt-4o  (포털 > 배포 탭에서 확인)
-        AOAI_API_VERSION- (선택) ex) 2024-08-01-preview, 기본값 사용 가능
-
-    OpenAI 환경변수 (AOAI 없을 때 폴백):
-        OPENAI_API_KEY
-    """
     azure_key      = os.getenv("AOAI_KEY")
     azure_endpoint = os.getenv("AOAI_ENDPOINT")
 
